@@ -2,9 +2,11 @@ name: Auto Release GUI on Lib Update
 
 on:
   workflow_dispatch:
+  repository_dispatch:
 
 jobs:
   auto-release:
+    if: github.event_name == 'workflow_dispatch' || github.event.action == 'trigger-auto-release'
     runs-on: windows-latest
     permissions:
       contents: write
@@ -22,38 +24,42 @@ jobs:
           python-version: '3.10'
 
       - name: Install dependencies
+        shell: pwsh
         run: |
           python -m pip install --upgrade pip
           pip install hatch
 
       - name: Bump version (dev)
         id: bump
+        shell: pwsh
         run: |
-          NEW_VERSION=$(hatch version dev)
-          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          $NEW_VERSION = hatch version dev
+          echo "new_version=$NEW_VERSION" >> $env:GITHUB_OUTPUT
           echo "Bumped to: $NEW_VERSION"
 
       - name: Sanitize version string
         id: sanitize
+        shell: pwsh
         env:
           RAW_VERSION: ${{ steps.bump.outputs.new_version }}
         run: |
-          CLEAN_VERSION=$(echo "$RAW_VERSION" | sed 's/[^0-9A-Za-z._-]//g')
-          echo "version=$CLEAN_VERSION" >> $GITHUB_OUTPUT
+          $CLEAN_VERSION = $env:RAW_VERSION -replace '[^0-9A-Za-z._-]', ''
+          echo "version=$CLEAN_VERSION" >> $env:GITHUB_OUTPUT
 
       - name: Create version bump branch
+        shell: pwsh
         env:
           VERSION: ${{ steps.sanitize.outputs.version }}
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
-          git checkout -b bump-version-$VERSION
-          git commit -am "🔧 Bump version to $VERSION"
-          git push origin bump-version-$VERSION
+          git checkout -b bump-version-$env:VERSION
+          git commit -am "🔧 Bump version to $env:VERSION"
+          git push origin bump-version-$env:VERSION
 
       - name: Create Pull Request
         id: cpr
-        uses: peter-evans/create-pull-request@271a8d0340265f705b14b6d32b9829c1cb33d45e
+        uses: peter-evans/create-pull-request@v6
         with:
           branch: bump-version-${{ steps.sanitize.outputs.version }}
           title: "🔧 Bump version to ${{ steps.sanitize.outputs.version }}"
@@ -63,11 +69,12 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Enable auto-merge
+        shell: pwsh
         env:
           PR_URL: ${{ steps.cpr.outputs.pull-request-url }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh pr merge "$PR_URL" --auto --merge
+          gh pr merge "$env:PR_URL" --auto --merge
 
   wait-for-merge:
     runs-on: ubuntu-latest
@@ -77,7 +84,7 @@ jobs:
 
     steps:
       - name: Wait for PR to be merged
-        uses: juliangruber/sleep-action@6e41f7ec81a7cc8f4713f91846369461d34da8a5
+        uses: juliangruber/sleep-action@v1
         with:
           time: 120s
 
@@ -105,7 +112,7 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Create GitHub Release
-        uses: ncipollo/release-action@440c8c1cb0ed28b9f43e4d1d670870f059653174
+        uses: ncipollo/release-action@v1
         with:
           draft: false
           tag: v${{ steps.get_version.outputs.version }}
