@@ -75,11 +75,7 @@ jobs:
           delete-branch: true
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Debug PR URL
-        run: echo "Pull request URL: ${{ steps.cpr.outputs.pull-request-url }}"
-
       - name: Enable auto-merge
-        if: steps.cpr.outputs.pull-request-url != ''
         shell: pwsh
         env:
           PR_URL: ${{ steps.cpr.outputs.pull-request-url }}
