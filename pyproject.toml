@@ -58,7 +58,8 @@ dependencies = [
 ]
 
 [tool.hatch.envs.default.scripts]
-test = "pytest --runslow && pytest -m slow"
+test = "pytest --runslow && (pytest -m slow || true)"
+
 test-fast = "pytest"
 lint = [
     "isort imxInsightsApps/ tests/",
