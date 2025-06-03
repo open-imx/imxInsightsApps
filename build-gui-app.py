@@ -2,6 +2,7 @@ import os
 import shutil
 import subprocess
 import sys
+import io
 from pathlib import Path
 
 import nicegui
@@ -12,6 +13,8 @@ from imxInsightsApps.build_helpers import (
     remove_folder_safely,
 )
 from imxInsightsApps import __version__ as apps_version
+
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 # App constants
 EXECUTABLE_NAME = "imx-tools-gui"
