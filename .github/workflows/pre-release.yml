@@ -73,6 +73,5 @@ jobs:
           tag: v${{ env.version }}
           generateReleaseNotes: true
           artifacts: |
-            dist/imxTools-${{ env.version }}-windows.zip
-            dist/imxtools-${{ env.version }}-py3-none-any.whl
+            dist/imx-tools-gui-${{ env.version }}-windows.zip
           token: ${{ secrets.GITHUB_TOKEN }}
