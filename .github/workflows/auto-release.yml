@@ -52,13 +52,16 @@ jobs:
           $CLEAN_VERSION = $env:RAW_VERSION -replace '[^0-9A-Za-z._-]', ''
           echo "version=$CLEAN_VERSION" >> $env:GITHUB_OUTPUT
 
-      - name: Create version bump branch
+      - name: Create version bump branch and push
         shell: pwsh
         env:
           VERSION: ${{ steps.sanitize.outputs.version }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git checkout -b bump-version-$env:VERSION
-          git commit -am "🔧 Bump version to $env:VERSION"
+          git add .
+          git commit -m "🔧 Bump version to $env:VERSION"
+          git remote set-url origin https://x-access-token:$env:GH_TOKEN@github.com/${{ github.repository }}.git
           git push origin bump-version-$env:VERSION
 
       - name: Create Pull Request
