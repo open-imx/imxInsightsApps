@@ -56,10 +56,6 @@ jobs:
             echo "should_release=false" >> $GITHUB_ENV
           fi
 
-      - name: Build wheel
-        if: env.should_release == 'true'
-        run: hatch build
-
       - name: Build GUI executable
         if: env.should_release == 'true'
         run: hatch run python build-gui-app.py
