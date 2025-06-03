@@ -21,7 +21,7 @@ EXECUTABLE_NAME = "imx-tools-gui"
 APP_FOLDER_NAME = f"{EXECUTABLE_NAME}-{apps_version}-windows"
 ENTRY_FILE = "imxInsightsApps/gui/main.py"
 
-# PathsDATA_FOLDER = Path("data")
+# Paths
 DIST_ROOT = Path("dist")
 FINAL_APP_FOLDER = DIST_ROOT / APP_FOLDER_NAME
 BUILD_FOLDER = Path(".build_gui_app")
@@ -56,8 +56,8 @@ def build_nicegui_app():
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         text=True,
+        encoding='utf-8',
         bufsize=1,
-        universal_newlines=True,
     )
 
     for line in process.stdout:
