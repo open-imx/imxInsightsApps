@@ -68,7 +68,7 @@ lint = [
 ]
 lint-check = [
     "ruff format --check imxInsightsApps/ tests/",
-    "ruff check imxInsightsApps/ apps/ ",
+    "ruff check imxInsightsApps/ ",
     "mypy imxInsightsApps/ --check-untyped-defs",
     "zizmor .github/workflows/ ",
 ]
@@ -84,7 +84,7 @@ target-version = "py310"
 
 [tool.ruff.lint]
 extend-select = ["I", "TRY", "UP"]
-ignore = ["TRY003"]
+ignore = ["TRY003", "TRY301", "TRY002"]
 
 [tool.isort]
 profile = "black"

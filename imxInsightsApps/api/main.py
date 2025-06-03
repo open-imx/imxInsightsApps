@@ -1,25 +1,25 @@
-from fastapi import FastAPI, UploadFile, File, Form
-from fastapi.responses import FileResponse
-from pathlib import Path
-from datetime import datetime
-import zipfile
 import tempfile
+import zipfile
+from datetime import datetime
+from pathlib import Path
 
-from imxInsights.file.singleFileImx.imxSituationEnum import ImxSituationEnum
+from fastapi import FastAPI, File, Form, UploadFile
+from fastapi.responses import FileResponse
 from imxInsights import __version__ as insights_version
+from imxInsights.file.singleFileImx.imxSituationEnum import ImxSituationEnum
 
-from imxInsightsApps.shared.diff_and_population import write_diff_output_files, write_population_output_files
 from imxInsightsApps import __version__ as apps_version
-
+from imxInsightsApps.shared.diff_and_population import (
+    write_diff_output_files,
+    write_population_output_files,
+)
 
 description = f"""
 Using [imxInsights {insights_version}](https://pypi.org/project/imxInsights/)  
 """
 
 api_app = FastAPI(
-    title="ImxInsights tools API",
-    description=description,
-    version=apps_version
+    title="ImxInsights tools API", description=description, version=apps_version
 )
 
 BASE_DIR = Path(tempfile.gettempdir()) / "imx_api"
@@ -33,6 +33,7 @@ def zip_output_folder(output_path: Path) -> Path:
             if file.is_file():
                 zipf.write(file, file.relative_to(output_path))
     return zip_path
+
 
 def get_situation_enum(value: str | None):
     return ImxSituationEnum(value) if value else None
@@ -50,6 +51,11 @@ async def create_diff(
 ):
     work_dir = BASE_DIR / f"diff_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
     work_dir.mkdir(parents=True, exist_ok=True)
+
+    if t1_file.filename is None:
+        raise ValueError("t1 imx should have a filename")
+    if t2_file.filename is None:
+        raise ValueError("t2 imx should have a filename")
 
     t1_path = work_dir / t1_file.filename
     t2_path = work_dir / t2_file.filename
@@ -84,6 +90,8 @@ async def create_population(
 ):
     work_dir = BASE_DIR / f"pop_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
     work_dir.mkdir(parents=True, exist_ok=True)
+    if imx_file.filename is None:
+        raise ValueError("imx should have a filename")
 
     imx_path = work_dir / imx_file.filename
     imx_path.write_bytes(await imx_file.read())
@@ -100,4 +108,3 @@ async def create_population(
 
     zip_path = zip_output_folder(work_dir)
     return FileResponse(zip_path, filename=zip_path.name, media_type="application/zip")
-
