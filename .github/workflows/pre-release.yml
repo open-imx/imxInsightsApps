@@ -42,7 +42,7 @@ jobs:
         id: version_check
         shell: bash
         run: |
-          VERSION=$(grep -Eo '__version__\s*=\s*"[^"]+"' imxTools/__init__.py | cut -d'"' -f2)
+          VERSION=$(grep -Eo '__version__\s*=\s*"[^"]+"' imxInsightsApps/__init__.py | cut -d'"' -f2)
           echo "version=$VERSION" >> $GITHUB_ENV
           echo "version=$VERSION"
 
