@@ -76,6 +76,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Enable auto-merge
+        if: steps.cpr.outputs.pull-request-url != ''
         shell: pwsh
         env:
           PR_URL: ${{ steps.cpr.outputs.pull-request-url }}
