@@ -127,4 +127,4 @@ jobs:
           name: 🚀 Release ${{ steps.get_version.outputs.version }}
           generateReleaseNotes: true
           artifacts: dist/imx-tools-gui-${{ steps.get_version.outputs.version }}-windows.zip
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.FINE_GRAINED_PAT }}
