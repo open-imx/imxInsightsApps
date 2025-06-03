@@ -4,6 +4,16 @@ from imxInsights import ImxContainer, ImxSingleFile
 from imxInsights.file.singleFileImx.imxSituationEnum import ImxSituationEnum
 
 
+def clear_directory(directory: Path) -> None:
+    if directory.exists() and directory.is_dir():
+        for item in directory.iterdir():
+            if item.is_file() and item.name != "generated.content":
+                item.unlink()
+            elif item.is_dir():
+                clear_directory(item)
+                item.rmdir()
+
+
 def load_imxinsights_container_or_file(path: Path, situation: ImxSituationEnum | None):
     if path.suffix == ".zip":
         return ImxContainer(path)
