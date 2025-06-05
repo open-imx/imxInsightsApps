@@ -28,84 +28,60 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install hatch
+      
+      # WE SHOULD ADD TESTS!
 
-      - name: Configure Git user (required for Hatch commit)
-        shell: pwsh
+      - name: Setup GIT
         run: |
-          git config user.name "github-actions"
-          git config user.email "actions@github.com"
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git checkout -b version-bump-${{ github.sha }}
 
-      - name: Bump version (dev)
-        id: bump
-        shell: pwsh
+      - name: Bump version
         run: |
-          $NEW_VERSION = hatch version dev
-          echo "new_version=$NEW_VERSION" >> $env:GITHUB_OUTPUT
-          echo "Bumped to: $NEW_VERSION"
+          hatch version dev
 
-      - name: Sanitize version string
-        id: sanitize
-        shell: pwsh
-        env:
-          RAW_VERSION: ${{ steps.bump.outputs.new_version }}
+      - name: Push changes
         run: |
-          $CLEAN_VERSION = $env:RAW_VERSION -replace '[^0-9A-Za-z._-]', ''
-          echo "version=$CLEAN_VERSION" >> $env:GITHUB_OUTPUT
-
-      - name: Create version bump branch and push
-        shell: pwsh
-        env:
-          VERSION: ${{ steps.sanitize.outputs.version }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          git checkout -b bump-version-$env:VERSION
           git add .
-          git commit -m "🔧 Bump version to $env:VERSION"
-          git remote set-url origin https://x-access-token:$env:GH_TOKEN@github.com/${{ github.repository }}.git
-          git push origin bump-version-$env:VERSION
+          git status
+          git push origin version-bump-${{ github.sha }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create Pull Request
-        id: cpr
-        uses: peter-evans/create-pull-request@v6
-        with:
-          branch: bump-version-${{ steps.sanitize.outputs.version }}
-          title: "🔧 Bump version to ${{ steps.sanitize.outputs.version }}"
-          body: "This PR bumps the version to ${{ steps.sanitize.outputs.version }} after dependency update."
-          base: main
-          delete-branch: true
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Enable auto-merge
-        if: steps.cpr.outputs.pull-request-url != ''
-        shell: pwsh
-        env:
-          PR_URL: ${{ steps.cpr.outputs.pull-request-url }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh pr merge "$env:PR_URL" --auto --merge
+          gh pr create --base main --head version-bump-${{ github.sha }} --title ":arrow_up: Version bump" --body "Automatic magic build version upgrade."
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  wait-for-merge:
-    runs-on: ubuntu-latest
-    needs: auto-release
-    permissions:
-      contents: read
+      - name: Merge Pull Request
+        run: |
+          gh pr merge ${{ env.pr_url }} --merge
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    steps:
-      - name: Wait for PR to be merged
-        uses: juliangruber/sleep-action@v1
-        with:
-          time: 120s
+      - name: Delete Branch
+        run: |
+          git push origin --delete version-bump-${{ github.sha }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Checkout merged main
-        uses: actions/checkout@v4
-        with:
-          ref: main
-          persist-credentials: false
+      - name: Get version
+        id: get_version
+        run: |
+          version=$(python -c 'import re; exec(open("imxInsightsApps/__init__.py").read()); print(__version__)')
+          echo "VERSION=$version" >> $GITHUB_ENV
 
-      - name: Set up Python again
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
+      - name: Get original PR details
+        id: get_pr_details
+        run: |
+          pr_title=$(gh pr view ${{ github.event.pull_request.number }} --json title --jq '.title')
+          pr_body=$(gh pr view ${{ github.event.pull_request.number }} --json body --jq '.body')
+          echo "PR_TITLE=$pr_title" >> $GITHUB_ENV
+          echo "PR_BODY=$pr_body" >> $GITHUB_ENV
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install and build
         run: |
@@ -113,18 +89,16 @@ jobs:
           pip install hatch pyinstaller
           hatch run python build-gui-app.py
 
-      - name: Get final version
-        id: get_version
-        run: |
-          VERSION=$(grep -Eo '__version__\s*=\s*"[^"]+"' imxInsightsApps/__init__.py | cut -d'"' -f2)
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Create GitHub Release
         uses: ncipollo/release-action@v1
         with:
-          draft: false
-          tag: v${{ steps.get_version.outputs.version }}
           name: 🚀 Release ${{ steps.get_version.outputs.version }}
-          generateReleaseNotes: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: v${{ steps.get_version.outputs.version }}
+          body: |
+            ***${{ env.PR_TITLE }}***
+    
+            ${{ env.PR_BODY }}
+          draft: false
           artifacts: dist/imx-tools-gui-${{ steps.get_version.outputs.version }}-windows.zip
-          token: ${{ secrets.FINE_GRAINED_PAT }}
