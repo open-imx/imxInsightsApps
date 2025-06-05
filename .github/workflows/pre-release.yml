@@ -3,17 +3,15 @@ name: Pre Release
 on:
   push:
     branches:
+      - dev
       - main
+  workflow_dispatch:
 
 jobs:
   test:
     uses: ./.github/workflows/test.yml
-    with:
-      runs-on: windows-latest
     permissions:
-      contents: write
-      id-token: write
-      actions: write
+      contents: read
 
   pre-release:
     runs-on: windows-latest
@@ -25,8 +23,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-        with:
-          persist-credentials: false
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -35,22 +31,20 @@ jobs:
 
       - name: Install tools
         run: |
-          python -m pip install --upgrade pip
-          pip install hatch pyinstaller jq
+          pip install --upgrade pip
+          pip install hatch pyinstaller jq packaging
 
       - name: Extract and compare versions
         id: version_check
         shell: bash
         run: |
-          VERSION=$(grep -Eo '__version__\s*=\s*"[^"]+"' imxInsightsApps/__init__.py | cut -d'"' -f2)
+          VERSION=$(python -c "import re; exec(open('imxInsightsApps/__init__.py').read()); print(__version__)")
+          LATEST_VERSION=$(curl -s https://api.github.com/repos/${{ github.repository }}/releases | jq -r '[.[] | select(.prerelease == false)][0].tag_name' | sed 's/^v//')
+
           echo "version=$VERSION" >> $GITHUB_ENV
-          echo "version=$VERSION"
-
-          LATEST_VERSION=$(curl -s https://api.github.com/repos/${{ github.repository }}/releases/latest | jq -r .tag_name | sed 's/^v//')
           echo "latest_version=$LATEST_VERSION" >> $GITHUB_ENV
-          echo "latest_version=$LATEST_VERSION"
 
-          if [ "$VERSION" != "$LATEST_VERSION" ]; then
+          if [[ -z "$LATEST_VERSION" || "$VERSION" != "$LATEST_VERSION" ]]; then
             echo "should_release=true" >> $GITHUB_ENV
           else
             echo "should_release=false" >> $GITHUB_ENV
@@ -58,16 +52,20 @@ jobs:
 
       - name: Build GUI executable
         if: env.should_release == 'true'
-        run: hatch run python build-gui-app.py
+        run: python build-gui-app.py
 
-      - name: Upload pre-release
+      - name: Check artifact exists
         if: env.should_release == 'true'
-        uses: ncipollo/release-action@440c8c1cb0ed28b9f43e4d1d670870f059653174
+        run: test -f dist/imx-tools-gui-${{ env.version }}-windows.zip
+
+      - name: Upload release
+        if: env.should_release == 'true'
+        uses: ncipollo/release-action@v1
         with:
-          draft: true
-          name: 🚀 Version ${{ env.version }}
+          name: "🚀 Version ${{ env.version }}"
           tag: v${{ env.version }}
           generateReleaseNotes: true
-          artifacts: |
-            dist/imx-tools-gui-${{ env.version }}-windows.zip
+          draft: ${{ github.ref != 'refs/heads/main' }}
+          prerelease: ${{ github.ref == 'refs/heads/dev' }}
+          artifacts: dist/imx-tools-gui-${{ env.version }}-windows.zip
           token: ${{ secrets.GITHUB_TOKEN }}

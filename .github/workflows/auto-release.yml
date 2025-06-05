@@ -15,89 +15,70 @@ jobs:
     steps:
       - name: Checkout GUI Repo
         uses: actions/checkout@v4
-        with:
-          persist-credentials: true
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
-      - name: Install dependencies
-        shell: pwsh
+      - name: Install tools
         run: |
-          python -m pip install --upgrade pip
-          pip install hatch
-      
-      # WE SHOULD ADD TESTS!
+          pip install --upgrade pip
+          pip install hatch pyinstaller
 
-      - name: Setup GIT
+      - name: Setup Git
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
           git checkout -b version-bump-${{ github.sha }}
 
       - name: Bump version
-        run: |
-          hatch version dev
+        run: hatch version patch
 
       - name: Push changes
         run: |
           git add .
-          git status
+          git commit -m "chore: bump version due to core dependency update"
           git push origin version-bump-${{ github.sha }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create Pull Request
+        id: create_pr
         run: |
-          gh pr create --base main --head version-bump-${{ github.sha }} --title ":arrow_up: Version bump" --body "Automatic magic build version upgrade."
+          gh pr create --base main --head version-bump-${{ github.sha }} \
+            --title ":arrow_up: Auto version bump" \
+            --body "Automatic patch version bump triggered by core dependency update."
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Merge Pull Request
         run: |
-          gh pr merge ${{ env.pr_url }} --merge
+          PR_URL=$(gh pr list --head version-bump-${{ github.sha }} --json url -q '.[0].url')
+          gh pr merge "$PR_URL" --merge
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Delete Branch
-        run: |
-          git push origin --delete version-bump-${{ github.sha }}
+        run: git push origin --delete version-bump-${{ github.sha }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Get version
         id: get_version
         run: |
-          $version = python -c "import re; exec(open('imxInsightsApps/__init__.py').read()); print(__version__)"
-          echo "VERSION=$version" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-          echo "::set-output name=version::$version"
-        shell: pwsh
+          VERSION=$(python -c "import re; exec(open('imxInsightsApps/__init__.py').read()); print(__version__)")
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "::set-output name=version::$VERSION"
 
-      - name: Get original PR details
-        id: get_pr_details
-        run: |
-          $pr = gh pr view --json title,body --jq "{ title: .title, body: .body }" | ConvertFrom-Json
-          echo "PR_TITLE=$($pr.title)" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-          echo "PR_BODY=$($pr.body)" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Install and build
-        run: |
-          pip install hatch pyinstaller
-          hatch run python build-gui-app.py
+      - name: Build GUI executable
+        run: hatch run python build-gui-app.py
 
       - name: Create GitHub Release
-        uses: ncipollo/release-action@440c8c1cb0ed28b9f43e4d1d670870f059653174
+        uses: ncipollo/release-action@v1
         with:
-          name: 🚀 Release ${{ steps.get_version.outputs.version }}
-          token: ${{ secrets.GITHUB_TOKEN }}
+          name: "🚀 Auto Release ${{ steps.get_version.outputs.version }}"
           tag: v${{ steps.get_version.outputs.version }}
-          body: |
-            ***${{ env.PR_TITLE }}***
-    
-            ${{ env.PR_BODY }}
           draft: false
-          artifacts: dist/imx-tools-gui-${{ steps.get_version.outputs.version }}-windows.zip
+          prerelease: false
+          art
