@@ -70,8 +70,8 @@ jobs:
       - name: Get version
         id: get_version
         run: |
-          version=$(python -c 'import re; exec(open("imxInsightsApps/__init__.py").read()); print(__version__)')
-          echo "VERSION=$version" >> $GITHUB_ENV
+          $version = python -c "import re; exec(open('imxInsightsApps/__init__.py').read()); print(__version__)"
+          echo "VERSION=$version" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
       - name: Get original PR details
         id: get_pr_details
