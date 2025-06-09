@@ -47,7 +47,8 @@ jobs:
 
       - name: Create Pull Request
         id: create_pr
-        run: gh pr create --base main --head version-bump-${{ github.sha }} --title ":arrow_up: Auto version bump" --body "Automatic patch version bump triggered by core dependency update."
+        run: >
+          gh pr create --base main --head version-bump-${{ github.sha }} --title ":arrow_up: Auto version bump" --body "Automatic patch version bump triggered by core dependency update."
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
