@@ -23,7 +23,7 @@ jobs:
       - name: Checkout GUI Repo
         uses: actions/checkout@v4
         with:
-          persist-credentials: true  # Important for git push to work without manual auth
+          persist-credentials: true
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -59,10 +59,17 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Approve Pull Request
+        run: |
+          pr_url=$(gh pr list --head version-bump-${{ github.sha }} --json url -q '.[0].url')
+          gh pr review "$pr_url" --approve
+        env:
+          GITHUB_TOKEN: ${{ secrets.PR_APPROVER_TOKEN }}
+
       - name: Merge Pull Request
         run: |
-          $prUrl = gh pr list --head version-bump-${{ github.sha }} --json url -q '.[0].url'
-          gh pr merge "$prUrl" --merge --admin
+          pr_url=$(gh pr list --head version-bump-${{ github.sha }} --json url -q '.[0].url')
+          gh pr merge "$pr_url" --merge --admin
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
