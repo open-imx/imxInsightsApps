@@ -1,0 +1,92 @@
+name: Auto Release GUI on Lib Update
+
+on:
+  workflow_dispatch:
+  repository_dispatch:
+
+jobs:
+
+  test:
+    uses: ./.github/workflows/test.yml
+    permissions:
+      contents: read
+
+  auto-release:
+    if: github.event_name == 'workflow_dispatch' || github.event.action == 'trigger-auto-release'
+    runs-on: windows-latest
+    needs: test
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout GUI Repo
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true  # Important for git push to work without manual auth
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install tools
+        run: |
+          pip install --upgrade pip
+          pip install hatch pyinstaller nicegui imxInsights openpyxl
+
+      - name: Setup Git
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git checkout -b version-bump-${{ github.sha }}
+
+      - name: Bump version
+        run: hatch version patch
+
+      - name: Commit version bump
+        run: |
+          git add .
+          git commit -m "chore: bump version due to core dependency update" || echo "Nothing to commit"
+          git push origin version-bump-${{ github.sha }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create Pull Request
+        id: create_pr
+        run: >
+          gh pr create --base main --head version-bump-${{ github.sha }} --title ":arrow_up: Auto version bump" --body "Automatic patch version bump triggered by core dependency update."
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Merge Pull Request
+        run: |
+          $prUrl = gh pr list --head version-bump-${{ github.sha }} --json url -q '.[0].url'
+          gh pr merge "$prUrl" --merge --admin
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Delete Branch
+        run: git push origin --delete version-bump-${{ github.sha }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get version
+        id: get_version
+        run: |
+          $version = python -c "import re; exec(open('imxInsightsApps/__init__.py').read()); print(__version__)"
+          echo "VERSION=$version" >> $env:GITHUB_ENV
+          echo "version=$version" >> $env:GITHUB_OUTPUT
+
+      - name: Build GUI executable
+        run: hatch run python build-gui-app.py
+
+      - name: Create GitHub Release
+        uses: ncipollo/release-action@440c8c1cb0ed28b9f43e4d1d670870f059653174
+        with:
+          name: "🚀 Auto Release ${{ steps.get_version.outputs.version }}"
+          tag: v${{ steps.get_version.outputs.version }}
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

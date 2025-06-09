@@ -1,0 +1,83 @@
+name: Pre Release
+
+on:
+  push:
+    branches:
+      - dev
+      - main
+  workflow_dispatch:
+
+jobs:
+  test:
+    uses: ./.github/workflows/test.yml
+    permissions:
+      contents: read
+
+  pre-release:
+    runs-on: windows-latest
+    needs: test
+    environment: release
+    permissions:
+      contents: write
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install tools
+        run: |
+          pip install --upgrade pip
+          pip install hatch pyinstaller jq packaging nicegui imxInsights openpyxl
+
+      - name: Determine if release is needed
+        id: check_release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION=$(python -c "import re; exec(open('imxInsightsApps/__init__.py').read()); print(__version__)")
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+          API_URL="https://api.github.com/repos/open-imx/imxInsightsApps/releases"
+          RESPONSE=$(curl -s -H "Authorization: token $GH_TOKEN" "$API_URL")
+
+          LATEST_VERSION=""
+          if echo "$RESPONSE" | jq -e 'type == "array" and length > 0' > /dev/null; then
+            LATEST_VERSION=$(echo "$RESPONSE" | jq -r '[.[] | select(.prerelease == false)][0].tag_name' | sed 's/^v//')
+          fi
+
+          echo "LATEST_VERSION=$LATEST_VERSION" >> $GITHUB_ENV
+
+          if [[ -z "$LATEST_VERSION" || "$VERSION" != "$LATEST_VERSION" ]]; then
+            echo "should_release=true" >> $GITHUB_ENV
+          else
+            echo "should_release=false" >> $GITHUB_ENV
+          fi
+
+      - name: Build GUI executable
+        if: env.should_release == 'true'
+        run: python build-gui-app.py
+
+      - name: Check artifact exists
+        if: env.should_release == 'true'
+        run: test -f dist/imx-tools-gui-${{ env.version }}-windows.zip
+
+      - name: Upload release
+        if: env.should_release == 'true'
+        uses: ncipollo/release-action@440c8c1cb0ed28b9f43e4d1d670870f059653174
+        with:
+          name: "🚀 Version ${{ env.version }}"
+          tag: v${{ env.version }}
+          generateReleaseNotes: true
+          draft: ${{ github.ref != 'refs/heads/main' }}
+          prerelease: ${{ github.ref == 'refs/heads/dev' }}
+          artifacts: dist/imx-tools-gui-${{ env.version }}-windows.zip
+          token: ${{ secrets.GITHUB_TOKEN }}
