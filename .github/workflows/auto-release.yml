@@ -65,7 +65,7 @@ jobs:
           $pr_url = gh pr list --head version-bump-${{ github.sha }} --json url -q '.[0].url'
           gh pr review $pr_url --approve
         env:
-          GITHUB_TOKEN: ${{ secrets.PR_APPROVER_TOKEN }}
+          GH_TOKEN: ${{ secrets.PR_APPROVER_TOKEN }}
 
       - name: Merge Pull Request
         shell: pwsh
