@@ -1,6 +1,10 @@
+import os
 import sys
 
+import sentry_sdk
+from dotenv import load_dotenv
 from nicegui import app, native, ui
+from sentry_sdk.integrations.fastapi import FastApiIntegration
 
 from imxInsightsApps.api.main import api_app
 from imxInsightsApps.gui.logic.cleanup import (
@@ -9,6 +13,15 @@ from imxInsightsApps.gui.logic.cleanup import (
     setup_hidden_base_dir,
 )
 from imxInsightsApps.gui.ui.main_page import main_page
+
+load_dotenv()
+
+sentry_sdk.init(
+    integrations=[FastApiIntegration()],
+    dsn=os.getenv("SENTRY_DSN"),
+    send_default_pii=True,
+    traces_sample_rate=1.0,
+)
 
 app.on_startup(setup_hidden_base_dir)
 app.on_disconnect(cleanup_user_temp_files)

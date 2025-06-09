@@ -1,6 +1,9 @@
 # 🚄 imxInsightsApps
 
-**imxInsightsApps** is the frontend and API layer for the [imxInsights](https://github.com/open-imx/imxInsights) library — a toolkit for analyzing and visualizing ProRail IMX data. This project wraps core functionality into a sleek [NiceGUI](https://nicegui.io/) web interface and a robust [FastAPI](https://fastapi.tiangolo.com/) backend.
+**imxInsightsApps** is the frontend and API layer for the [imxInsights](https://github.com/open-imx/imxInsights) library — a toolkit for analyzing and visualizing IMX data. This project wraps core functionality into a sleek [NiceGUI](https://nicegui.io/) web interface and a robust [FastAPI](https://fastapi.tiangolo.com/) backend.
+
+***THIS LIBRARY*** is a personal project and therefore no responsibility for the functionality, accuracy, or usage of this library. 
+***THE PUBLIC retains full ownership and responsibility for the codebase.***
 
 ---
 
@@ -13,28 +16,33 @@
   Programmatic access to core functionality:
   - IMX file comparison
   - Population validation
+  - Excel and geojson support
+
+⚠️ Heads up! We use Sentry.io to monitor and improve our application's stability. It helps us detect and resolve issues faster.
 
 ---
 
 ## 🚀 Getting Started
 
-### 🔧 Installation
-
-```bash
-git clone https://github.com/open-imx/imxInsightsApps.git
-cd imxInsightsApps
-pip install -e .[all]
-```
-
 ### ▶️ Run the App
 
 ```bash
-# Start the NiceGUI web app
-python -m imxInsightsApps.web
+# Start the NiceGUI app
+python imxInsightsApps\gui\main.py
 
-# OR start the FastAPI backend
-uvicorn imxInsightsApps.api:app --reload
+# OR start the FastAPI api
+python run_api.py
 ```
+
+---
+
+## Open-IMX Initiative
+**imxInsights** is part of the **Open-IMX initiative**, which is dedicated to enhancing the accessibility and usability of IMX data. 
+This initiative aims to provide a collaborative environment for developers, data analysts and railway professionals to effectively work with IMX data.
+
+### 🗪 Discord Community Channel 🤝
+
+💥 We invite you to join the [👉 open-imx community on Discord](https://discord.gg/wBses7bPFg). 
 
 ---
 
@@ -62,8 +70,8 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for full development & release guidelin
 ```
 imxInsightsApps/
 ├── api/              # FastAPI implementation
-├── web/              # NiceGUI-based frontend
-├── core/             # Shared utils and logic
+├── gui/              # NiceGUI-based frontend
+├── shared/           # Shared utils and logic
 ├── __init__.py       # Version entry point
 ```
 
