@@ -47,17 +47,14 @@ jobs:
 
       - name: Create Pull Request
         id: create_pr
-        run: |
-          gh pr create --base main --head version-bump-${{ github.sha }} \
-            --title ":arrow_up: Auto version bump" \
-            --body "Automatic patch version bump triggered by core dependency update."
+        run: gh pr create --base main --head version-bump-${{ github.sha }} --title ":arrow_up: Auto version bump" --body "Automatic patch version bump triggered by core dependency update."
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Merge Pull Request
         run: |
-          PR_URL=$(gh pr list --head version-bump-${{ github.sha }} --json url -q '.[0].url')
-          gh pr merge "$PR_URL" --merge --admin
+          $prUrl = gh pr list --head version-bump-${{ github.sha }} --json url -q '.[0].url'
+          gh pr merge "$prUrl" --merge --admin
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -69,9 +66,9 @@ jobs:
       - name: Get version
         id: get_version
         run: |
-          VERSION=$(python -c "import re; exec(open('imxInsightsApps/__init__.py').read()); print(__version__)")
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          $version = python -c "import re; exec(open('imxInsightsApps/__init__.py').read()); print(__version__)"
+          echo "VERSION=$version" >> $env:GITHUB_ENV
+          echo "version=$version" >> $env:GITHUB_OUTPUT
 
       - name: Build GUI executable
         run: hatch run python build-gui-app.py
