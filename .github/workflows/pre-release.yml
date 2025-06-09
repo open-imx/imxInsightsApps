@@ -36,16 +36,29 @@ jobs:
           pip install --upgrade pip
           pip install hatch pyinstaller jq packaging
 
-      - name: Extract and compare versions
-        id: version_check
+      - name: Determine if release is needed
+        id: check_release
         shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           VERSION=$(python -c "import re; exec(open('imxInsightsApps/__init__.py').read()); print(__version__)")
-          LATEST_VERSION=$(curl -s https://api.github.com/repos/${{ github.repository }}/releases | jq -r '[.[] | select(.prerelease == false)][0].tag_name' | sed 's/^v//')
-
-          echo "version=$VERSION" >> $GITHUB_ENV
-          echo "latest_version=$LATEST_VERSION" >> $GITHUB_ENV
-
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "::set-output name=version::$VERSION"
+      
+          API_URL="https://api.github.com/repos/open-imx/imxInsightsApps/releases"
+          RESPONSE=$(curl -s -H "Authorization: token $GH_TOKEN" "$API_URL")
+      
+          # Default to no previous version
+          LATEST_VERSION=""
+      
+          # Only proceed if the response is a non-empty array
+          if echo "$RESPONSE" | jq -e 'type == "array" and length > 0' > /dev/null; then
+            LATEST_VERSION=$(echo "$RESPONSE" | jq -r '[.[] | select(.prerelease == false)][0].tag_name' | sed 's/^v//')
+          fi
+      
+          echo "LATEST_VERSION=$LATEST_VERSION" >> $GITHUB_ENV
+      
           if [[ -z "$LATEST_VERSION" || "$VERSION" != "$LATEST_VERSION" ]]; then
             echo "should_release=true" >> $GITHUB_ENV
           else
