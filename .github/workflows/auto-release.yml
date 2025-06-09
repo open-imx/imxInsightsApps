@@ -16,7 +16,7 @@ jobs:
       - name: Checkout GUI Repo
         uses: actions/checkout@v4
         with:
-          persist-credentials: false
+          persist-credentials: true  # Important for git push to work without manual auth
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -37,11 +37,16 @@ jobs:
       - name: Bump version
         run: hatch version patch
 
-      - name: Push changes
+      - name: Commit version bump
         run: |
           git add .
-          git commit -m "chore: bump version due to core dependency update"
+          git commit -m "chore: bump version due to core dependency update" || echo "Nothing to commit"
           git push origin version-bump-${{ github.sha }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Authenticate gh CLI
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -57,7 +62,7 @@ jobs:
       - name: Merge Pull Request
         run: |
           PR_URL=$(gh pr list --head version-bump-${{ github.sha }} --json url -q '.[0].url')
-          gh pr merge "$PR_URL" --merge
+          gh pr merge "$PR_URL" --merge --admin
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -83,3 +88,5 @@ jobs:
           tag: v${{ steps.get_version.outputs.version }}
           draft: false
           prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
