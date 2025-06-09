@@ -1,70 +1,96 @@
+# 🚄 imxInsightsApps
+
+**imxInsightsApps** is the frontend and API layer for the [imxInsights](https://github.com/open-imx/imxInsights) library — a toolkit for analyzing and visualizing IMX data. This project wraps core functionality into a sleek [NiceGUI](https://nicegui.io/) web interface and a robust [FastAPI](https://fastapi.tiangolo.com/) backend.
+
+***THIS LIBRARY*** is a personal project and therefore no responsibility for the functionality, accuracy, or usage of this library. 
+***THE PUBLIC retains full ownership and responsibility for the codebase.***
 
 ---
 
-## 🌱 Git Flow: Feature → Dev → Main
+## ✨ Features
 
-Our development workflow follows a simple Git flow 🛤️✨.
+- 🖥️ **Web Interface (NiceGUI)**  
+  A modern, interactive UI for inspecting IMX files, running diffs, exporting reports, and more.
 
-1. **🌿 Feature branches**
-   - 🛠️ Created from `dev`
-   - 🧪 Used for building features or fixing bugs
-   - 💡 Example: `git checkout -b feature/add-theme-toggle`
+- 🔌 **API (FastAPI)**  
+  Programmatic access to core functionality:
+  - IMX file comparison
+  - Population validation
+  - Excel and geojson support
 
-2. **🌊 Development branch (`dev`)**
-   - 🔗 Integrates all feature branches
-   - 🚧 Every push triggers a **pre-release** (e.g. `1.3.0-dev.2`)
-   - 🧫 Used for internal testing — may be unstable, and that’s OK
-
-3. **🚀 Main branch (`main`)**
-   - ✅ Only receives reviewed & test passed code from `dev`
-   - 📦 Every push triggers a **stable release** (e.g. `1.3.0`)
-   - 🟢 Should always be in a deployable state — no excuses
-   
-### 🔁 **You break it, you fix it.**  
-
-> 
-> 🧯 Applies to both `dev` and `main` — no exceptions.  
-> 🕵️‍♂️ Find the issue • 🔧 Patch or revert it!  
-> 🤝 We're all in this together • 📣 Let us know 
->
-> 🧼 Clean `dev` = ⚙️ Smooth `main` = 🟢 Green CI = 🍻 = 😎 Happy you 
+⚠️ Heads up! We use Sentry.io to monitor and improve our application's stability. It helps us detect and resolve issues faster.
 
 ---
 
-## 🔁 Version Rules
+## 🚀 Getting Started
 
-🔧 Bug fix or dependency update → `PATCH` bump (`1.2.4 → 1.2.5`)  
-✨ New feature added → `MINOR` bump (`1.2.5 → 1.3.0`)  
-🚨 Breaking change → `MAJOR` bump (`1.3.0 → 2.0.0`)
-
-🧪 **Pre-releases**:
-- 🌱 Dev branch → `-dev.N` (e.g. `1.3.0-dev.2`)
-- 🔍 Final test candidate → `-rc.N` (e.g. `1.3.0-rc.1`)
-
-🛠️ Versioning is powered by [`hatch`](https://hatch.pypa.io/) and 📦 Stored in `imxInsightsApps/__init__.py`
-
----
-
-## 🧩 Release Workflow Summary
-
-| 🛠️ Workflow        | ⚡ Trigger                   | 🚀 Action                                                       |
-|--------------------|-----------------------------|-----------------------------------------------------------------|
-| 🧪 `Pre Release`   | 🔄 Push to `dev` or `main`   | 🏗️ Builds and publishes new version if it differs from latest    |
-| 🤖 `Auto Release`  | 📦 Dependency update | 🔁 Bumps `patch`, creates PR, merges it, builds and releases     |
-
-
-🔍 Version comparison is done using the GitHub Releases API and the version in `__init__.py`  
-🧃 Pre-releases are **automatically flagged** when releasing from `dev`  
-🛳️ Stable releases are created from `main` — **only if the version number has increased**
-
----
-
-## 🛠 Hatch Commands
+### ▶️ Run the App
 
 ```bash
-hatch version patch       # 🐞 Bug fix or 📦 dependency update
-hatch version minor       # ✨ New feature
-hatch version major       # 💥 Breaking change
+# Start the NiceGUI app
+python imxInsightsApps\gui\main.py
 
-hatch version dev         # 🧪 Development version
-hatch version rc          # 🔍 Release candidate
+# OR start the FastAPI api
+python run_api.py
+```
+
+---
+
+## Open-IMX Initiative
+**imxInsights** is part of the **Open-IMX initiative**, which is dedicated to enhancing the accessibility and usability of IMX data. 
+This initiative aims to provide a collaborative environment for developers, data analysts and railway professionals to effectively work with IMX data.
+
+### 🗪 Discord Community Channel 🤝
+
+💥 We invite you to join the [👉 open-imx community on Discord](https://discord.gg/wBses7bPFg). 
+
+---
+
+## 🧪 Development
+
+We follow a strict [Git Flow](./CONTRIBUTING.md#🌱-git-flow-feature-→-dev-→-main) to ensure stability and clean releases.
+
+```bash
+# Create a feature branch
+git checkout -b feature/my-feature dev
+
+# Bump version
+hatch version minor  # or patch / major / dev / rc
+
+# Run tests
+pytest
+```
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for full development & release guidelines.
+
+---
+
+## 📁 Project Structure
+
+```
+imxInsightsApps/
+├── api/              # FastAPI implementation
+├── gui/              # NiceGUI-based frontend
+├── shared/           # Shared utils and logic
+├── __init__.py       # Version entry point
+```
+
+---
+
+## 📚 Related Projects
+
+- [`imxInsights`](https://github.com/open-imx/imxInsights) – Core engine for IMX data processing
+- [`open-imx.nl`](https://open-imx.nl) – Community and documentation portal
+
+---
+
+## 💬 Feedback & Contributions
+
+We welcome issues, suggestions, and PRs!  
+Check out our [Contribution Guide](./CONTRIBUTING.md) and help improve railway data tools for everyone.
+
+---
+
+## 🛡 License
+
+[MIT License](LICENSE) © Open-IMX contributors

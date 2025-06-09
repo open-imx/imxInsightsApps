@@ -18,6 +18,8 @@ dependencies = [
     "openpyxl",
     "fastapi",
     "nicegui",
+    "sentry-sdk[fastapi,loguru]",
+    "python-dotenv",
 ]
 
 classifiers = [
