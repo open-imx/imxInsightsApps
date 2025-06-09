@@ -33,7 +33,7 @@ jobs:
       - name: Install tools
         run: |
           pip install --upgrade pip
-          pip install hatch pyinstaller nicegui imxInsights openpyxl
+          pip install hatch pyinstaller nicegui imxInsights openpyxl sentry_sdk
 
       - name: Setup Git
         run: |
