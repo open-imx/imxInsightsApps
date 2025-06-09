@@ -27,6 +27,7 @@ jobs:
         run: |
           pip install --upgrade pip
           pip install hatch pyinstaller
+          hatch env create 
 
       - name: Setup Git
         run: |

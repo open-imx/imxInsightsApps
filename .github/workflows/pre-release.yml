@@ -35,6 +35,7 @@ jobs:
         run: |
           pip install --upgrade pip
           pip install hatch pyinstaller jq packaging
+          hatch env create 
 
       - name: Determine if release is needed
         id: check_release
