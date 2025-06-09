@@ -18,7 +18,7 @@ def render_diff_tab(spinner_dialog):
     ui.markdown("""### 🔍 Compare IMX Containers and generate a diff report.""")
 
     t1_situation = create_situation_select("🧾 T1 Situation")
-    upload_t1 = create_upload_input(
+    create_upload_input(
         "📤 Upload T1 IMX or ZIP",
         on_upload=lambda e: handle_upload(
             e, "t1", t1_situation, state, HIDDEN_BASE_DIR
@@ -27,7 +27,7 @@ def render_diff_tab(spinner_dialog):
     )
 
     t2_situation = create_situation_select("🧾 T2 Situation")
-    upload_t2 = create_upload_input(
+    create_upload_input(
         "📤 Upload T2 IMX or ZIP",
         on_upload=lambda e: handle_upload(
             e, "t2", t2_situation, state, HIDDEN_BASE_DIR

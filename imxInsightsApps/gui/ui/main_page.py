@@ -2,7 +2,7 @@ from imxInsights import __version__ as insights_version
 from nicegui import app, ui
 
 from imxInsightsApps import __version__ as apps_version
-from imxInsightsApps.gui.logic.state_manager import get_client_id, init_tab_state
+from imxInsightsApps.gui.logic.state_manager import init_tab_state
 from imxInsightsApps.gui.ui.components import (
     create_dark_mode_toggle,
     create_spinner_dialog,
@@ -13,7 +13,6 @@ from imxInsightsApps.gui.ui.tabs.population import render_population_tab
 
 @ui.page("/")
 def main_page():
-    client_id = get_client_id()
     init_tab_state("diff")
     init_tab_state("population")
 

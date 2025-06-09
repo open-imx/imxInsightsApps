@@ -18,7 +18,7 @@ def render_population_tab(spinner_dialog):
     ui.markdown("""### 📊 Generate a population report from a IMX container.""")
 
     imx_situation = create_situation_select("📋 IMX Situation")
-    upload_imx = create_upload_input(
+    create_upload_input(
         "📤 Upload IMX or ZIP",
         on_upload=lambda e: handle_upload(
             e, "imx", imx_situation, state, HIDDEN_BASE_DIR
