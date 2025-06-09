@@ -16,7 +16,7 @@ Our development workflow follows a simple Git flow 🛤️✨.
    - 🧫 Used for internal testing — may be unstable, and that’s OK
 
 3. **🚀 Main branch (`main`)**
-   - ✅ Only receives tested & reviewed code from `dev`
+   - ✅ Only receives reviewed & test passed code from `dev`
    - 📦 Every push triggers a **stable release** (e.g. `1.3.0`)
    - 🟢 Should always be in a deployable state — no excuses
    
