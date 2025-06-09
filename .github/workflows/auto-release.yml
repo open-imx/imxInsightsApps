@@ -71,7 +71,7 @@ jobs:
         run: |
           VERSION=$(python -c "import re; exec(open('imxInsightsApps/__init__.py').read()); print(__version__)")
           echo "VERSION=$VERSION" >> $GITHUB_ENV
-          echo "::set-output name=version::$VERSION"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Build GUI executable
         run: hatch run python build-gui-app.py
