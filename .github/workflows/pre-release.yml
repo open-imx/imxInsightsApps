@@ -34,7 +34,7 @@ jobs:
       - name: Install tools
         run: |
           pip install --upgrade pip
-          pip install hatch pyinstaller jq packaging, nicegui
+          pip install hatch pyinstaller jq packaging nicegui
 
       - name: Determine if release is needed
         id: check_release
