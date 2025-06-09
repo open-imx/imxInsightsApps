@@ -24,7 +24,10 @@ def create_situation_select(label: str) -> Select:
 
 
 def create_spinner_dialog():
-    with ui.dialog().props('persistent') as dialog, ui.card().classes("p-8 items-center"):
+    with (
+        ui.dialog().props("persistent") as dialog,
+        ui.card().classes("p-8 items-center"),
+    ):
         ui.spinner(size="lg").props("color=primary")
         ui.label("⏳ Processing, please wait... 🛠️").classes("mt-4")
     return dialog
