@@ -26,8 +26,7 @@ jobs:
       - name: Install tools
         run: |
           pip install --upgrade pip
-          pip install hatch pyinstaller
-          hatch env create 
+          pip install hatch pyinstaller, nicegui
 
       - name: Setup Git
         run: |
