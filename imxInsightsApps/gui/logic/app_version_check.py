@@ -1,3 +1,5 @@
+import re
+
 import httpx
 from nicegui import ui
 from packaging.version import InvalidVersion, Version
@@ -42,21 +44,56 @@ async def fetch_newer_releases(include_pre_releases: bool = True):
         return newer_releases
 
 
+def normalize_markdown(notes: str) -> str:
+    lines = notes.splitlines()
+    cleaned = []
+
+    for line in lines:
+        # Remove lines with "by @user in https://..."
+        if re.search(r"by\s+@\w[\w-]*\s+in\s+https?://\S+", line):
+            line = "\n" + line.split("by @")[0] + "\n"
+
+        # Replace markdown headers (## or ###) with bolded text
+        line = re.sub(r"^(#{1,6})\s*(.+)", r"**\2**", line)
+
+        if "Full Changelog" in line:
+            continue
+
+        cleaned.append(line)
+
+    return "\n".join(cleaned).strip()
+
+
 async def new_version_release_dialog(include_pre_releases: bool = True):
     releases = await fetch_newer_releases(include_pre_releases=include_pre_releases)
-    if releases:
-        with ui.dialog() as dialog, ui.card().classes("w-full max-w-2xl"):
-            ui.label(
-                f"New version{'s' if len(releases) > 1 else ''} available!"
-            ).classes("text-xl font-bold")
-            for r in releases:
-                with ui.row():
-                    label = f"Version {r['version']}"
-                    if r["is_prerelease"]:
-                        label += " (pre-release)"
-                    ui.label(label)
-                    ui.link("View on GitHub", r["url"], new_tab=True)
+    if not releases:
+        return
 
-                ui.markdown(r["notes"])
-            ui.button("Close", on_click=dialog.close)
-        dialog.open()
+    normal_releases = [r for r in releases if not r["is_prerelease"]]
+    prereleases = [r for r in releases if r["is_prerelease"]]
+
+    with ui.dialog() as dialog, ui.card().classes("w-full max-w-2xl"):
+        ui.label(f"New version{'s' if len(releases) > 1 else ''} available!").style(
+            "color: #6E93D6; font-size: 200%; font-weight: 300"
+        )
+
+        if normal_releases:
+            ui.label("Releases").classes("text-lg font-semibold mt-4")
+            for r in normal_releases:
+                with ui.row():
+                    ui.label(f"Version {r['version']}")
+                    ui.link("View on GitHub", r["url"], new_tab=True)
+                ui.markdown(normalize_markdown(r["notes"]))
+
+        if prereleases:
+            ui.label("Pre-releases").classes("text-lg font-semibold mt-4")
+            for r in prereleases:
+                with ui.row():
+                    ui.label(f"Version {r['version']} (pre-release)")
+                    ui.link("View on GitHub", r["url"], new_tab=True)
+                with ui.expansion("Notes").classes("w-full"):
+                    ui.markdown(normalize_markdown(r["notes"]))
+
+        ui.button("Close", on_click=dialog.close)
+
+    dialog.open()
