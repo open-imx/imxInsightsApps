@@ -17,7 +17,7 @@ async def fetch_newer_releases(include_pre_releases: bool = True):
         newer_releases = []
 
         for release in releases:
-            tag = release["tag_name"].lstrip("v")  # remove leading 'v'
+            tag = release["tag_name"].lstrip("v")
             try:
                 release_version = Version(tag)
             except InvalidVersion:
@@ -35,11 +35,11 @@ async def fetch_newer_releases(include_pre_releases: bool = True):
                     }
                 )
 
-        return newer_releases
-
     except Exception as e:
         ui.notify(f"Failed to check for updates: {e}", type="negative")
         return []
+    else:
+        return newer_releases
 
 
 async def new_version_release_dialog(include_pre_releases: bool = True):

@@ -1,5 +1,3 @@
-import asyncio
-
 from imxInsights import __version__ as insights_version
 from nicegui import app, ui
 
