@@ -76,11 +76,19 @@ jobs:
         id: changelog
         shell: bash
         run: |
-          LATEST_TAG=$(git describe --tags --abbrev=0)
-          echo "Latest tag: $LATEST_TAG"
+          # Get latest reachable tag, fallback to full log if none
+          LATEST_TAG=$(git tag --sort=-creatordate | head -n 1)
+      
+          if [ -z "$LATEST_TAG" ]; then
+            echo "⚠️ No tags found, using full history."
+            RANGE=""
+          else
+            echo "Latest tag: $LATEST_TAG"
+            RANGE="$LATEST_TAG..HEAD"
+          fi
+      
           echo "## What's Changed" > RELEASE_BODY.md
-          git log $LATEST_TAG..HEAD --pretty=format:"- %s (%an)" >> RELEASE_BODY.md
-
+          git log $RANGE --pretty=format:"- %s (%an)" >> RELEASE_BODY.md
 
       - name: Output changelog
         shell: pwsh

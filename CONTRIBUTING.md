@@ -50,6 +50,18 @@ Versioning is handled by [`hatch`](https://hatch.pypa.io/)` version`
 
 The version lives in `imxInsightsApps/__init__.py`.
 
+| Command                 | Result              | New Version  |
+| ----------------------- | ------------------- | ------------ |
+| `hatch version dev`     | Next dev version    | `0.2.0.dev2` |
+| `hatch version alpha`   | First alpha release | `0.2.0a1`    |
+| `hatch version beta`    | First beta release  | `0.2.0b1`    |
+| `hatch version rc`      | First release cand. | `0.2.0rc1`   |
+| `hatch version release` | Final release       | `0.2.0`      |
+| `hatch version patch`   | Next patch dev      | `0.2.1.dev0` |
+| `hatch version minor`   | Next minor dev      | `0.3.0.dev0` |
+| `hatch version major`   | Next major dev      | `1.0.0.dev0` |
+
+
 ---
 
 ## 🚀 Release Automation
