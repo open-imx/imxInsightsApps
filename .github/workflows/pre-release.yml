@@ -72,14 +72,27 @@ jobs:
         if: env.should_release == 'true'
         run: test -f dist/imx-tools-gui-${{ env.version }}-windows.zip
 
+      - name: Generate changelog diff
+        id: changelog
+        run: |
+          LATEST_TAG=$(git describe --tags --abbrev=0)
+          echo "Latest tag: $LATEST_TAG"
+          echo "## What's Changed" > RELEASE_BODY.md
+          git log $LATEST_TAG..HEAD --pretty=format:"- %s (%an)" >> RELEASE_BODY.md
+
+      - name: Output changelog
+        shell: pwsh
+        run: Get-Content RELEASE_BODY.md
+
       - name: Upload release
         if: env.should_release == 'true'
         uses: ncipollo/release-action@440c8c1cb0ed28b9f43e4d1d670870f059653174
         with:
           name: "🚀 Version ${{ env.version }}"
           tag: v${{ env.version }}
-          generateReleaseNotes: true
           draft: ${{ github.ref != 'refs/heads/main' }}
           prerelease: ${{ github.ref == 'refs/heads/dev' }}
           artifacts: dist/imx-tools-gui-${{ env.version }}-windows.zip
+          bodyFile: RELEASE_BODY.md
           token: ${{ secrets.GITHUB_TOKEN }}
+
