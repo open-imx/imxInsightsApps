@@ -4,6 +4,43 @@ We welcome contributions! Here's how to get started with our Git flow and versio
 
 ---
 
+## ✅ Linting & Testing Expectations
+
+Before submitting code, make sure it passes linting and tests.
+
+### 🧪 Run tests
+
+```bash
+hatch run test-fast
+```
+
+Uses `pytest` to check your changes don't break anything.
+
+### 🧼 Linting (auto-fix)
+
+```bash
+hatch run lint
+```
+
+This will:
+- Sort imports with `isort`
+- Format code using `ruff`
+- Check types with `mypy`
+
+### 🔍 Lint check (CI-style, no auto-fixes)
+
+```bash
+hatch run lint-check
+```
+
+Runs:
+- Format check: `ruff format --check`
+- Static checks: `ruff check`
+- Type checks: `mypy`
+- GitHub workflow linter: `zizmor .github/workflows/`
+
+> 💡 Tip: Run `lint` before committing to avoid CI failures.
+
 ## 🌱 Git Flow: Feature → Dev → Main
 
 Our team follows a streamlined Git workflow:
@@ -43,24 +80,22 @@ Our team follows a streamlined Git workflow:
 | 💥 Breaking change     | `major`   | `1.3.0 → 2.0.0`    |
 
 ### 🧪 Pre-releases
+
+Versioning is handled by [`hatch`](https://hatch.pypa.io/)` version`
+- 
 - Development: `-dev.N` (e.g. `1.3.0-dev.2`)
 - Release candidates: `-rc.N` (e.g. `1.3.0-rc.1`)
 
-Versioning is handled by [`hatch`](https://hatch.pypa.io/)` version`
+| Command                   | Result              | New Version  |
+|---------------------------| ------------------- | ------------ |
+| `hatch version dev`       | Next dev version    | `0.2.0.dev2` |
+| `hatch version rc`        | First release cand. | `0.2.0rc1`   |
+| `hatch version release`   | Final release       | `0.2.0`      |
+| `hatch version patch`     | Next patch dev      | `0.2.1.dev0` |
+| `hatch version minor`     | Next minor dev      | `0.3.0.dev0` |
+| `hatch version major`     | Next major dev      | `1.0.0.dev0` |
 
 The version lives in `imxInsightsApps/__init__.py`.
-
-| Command                 | Result              | New Version  |
-| ----------------------- | ------------------- | ------------ |
-| `hatch version dev`     | Next dev version    | `0.2.0.dev2` |
-| `hatch version alpha`   | First alpha release | `0.2.0a1`    |
-| `hatch version beta`    | First beta release  | `0.2.0b1`    |
-| `hatch version rc`      | First release cand. | `0.2.0rc1`   |
-| `hatch version release` | Final release       | `0.2.0`      |
-| `hatch version patch`   | Next patch dev      | `0.2.1.dev0` |
-| `hatch version minor`   | Next minor dev      | `0.3.0.dev0` |
-| `hatch version major`   | Next major dev      | `1.0.0.dev0` |
-
 
 ---
 
@@ -74,21 +109,6 @@ The version lives in `imxInsightsApps/__init__.py`.
 - Version diffs are checked via GitHub Releases API vs `__init__.py`.
 - Dev branch triggers pre-releases automatically.
 - Main branch triggers **stable releases** — only when the version has increased.
-
----
-
-## 🛠️ Hatch Commands
-
-Run these commands to manage versions:
-
-```bash
-hatch version patch       # 🐞 Bug fix or 📦 dependency update
-hatch version minor       # ✨ New feature
-hatch version major       # 💥 Breaking change
-
-hatch version dev         # 🧪 Development version
-hatch version rc          # 🔍 Release candidate
-```
 
 ---
 

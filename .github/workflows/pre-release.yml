@@ -5,7 +5,6 @@ on:
     branches:
       - dev
       - main
-  workflow_dispatch:
 
 jobs:
   test:
@@ -76,7 +75,6 @@ jobs:
         id: changelog
         shell: bash
         run: |
-          # Get latest reachable tag, fallback to full log if none
           LATEST_TAG=$(git tag --sort=-creatordate | head -n 1)
       
           if [ -z "$LATEST_TAG" ]; then
