@@ -1,7 +1,10 @@
+import asyncio
+
 from imxInsights import __version__ as insights_version
 from nicegui import app, ui
 
 from imxInsightsApps import __version__ as apps_version
+from imxInsightsApps.gui.logic.app_version_check import new_version_release_dialog
 from imxInsightsApps.gui.logic.state_manager import init_tab_state
 from imxInsightsApps.gui.ui.components import (
     create_dark_mode_toggle,
@@ -12,7 +15,8 @@ from imxInsightsApps.gui.ui.tabs.population import render_population_tab
 
 
 @ui.page("/")
-def main_page():
+async def main_page():
+    await new_version_release_dialog()
     init_tab_state("diff")
     init_tab_state("population")
 
