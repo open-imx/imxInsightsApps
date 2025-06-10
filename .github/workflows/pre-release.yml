@@ -74,11 +74,13 @@ jobs:
 
       - name: Generate changelog diff
         id: changelog
+        shell: bash
         run: |
           LATEST_TAG=$(git describe --tags --abbrev=0)
           echo "Latest tag: $LATEST_TAG"
           echo "## What's Changed" > RELEASE_BODY.md
           git log $LATEST_TAG..HEAD --pretty=format:"- %s (%an)" >> RELEASE_BODY.md
+
 
       - name: Output changelog
         shell: pwsh
