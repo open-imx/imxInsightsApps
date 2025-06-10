@@ -65,8 +65,6 @@ jobs:
       - name: Build GUI executable
         if: env.should_release == 'true'
         run: python build-gui-app.py
-        env:
-          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
 
       - name: Check artifact exists
         if: env.should_release == 'true'

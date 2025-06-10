@@ -81,8 +81,6 @@ jobs:
 
       - name: Build GUI executable
         run: hatch run python build-gui-app.py
-        env:
-          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
 
       - name: Create GitHub Release
         uses: ncipollo/release-action@440c8c1cb0ed28b9f43e4d1d670870f059653174

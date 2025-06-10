@@ -1,8 +1,6 @@
-import os
 import sys
 
 import sentry_sdk
-from dotenv import load_dotenv
 from nicegui import app, native, ui
 from sentry_sdk.integrations.fastapi import FastApiIntegration
 
@@ -14,11 +12,9 @@ from imxInsightsApps.gui.logic.cleanup import (
 )
 from imxInsightsApps.gui.ui.main_page import main_page
 
-load_dotenv()
-
 sentry_sdk.init(
     integrations=[FastApiIntegration()],
-    dsn=os.getenv("SENTRY_DSN"),
+    dsn="https://b2123a82ecb63f9d6c5ecf073c250554@o4509408461127680.ingest.de.sentry.io/4509470274420816",
     send_default_pii=True,
     traces_sample_rate=1.0,
 )
@@ -29,7 +25,6 @@ app.on_shutdown(cleanup_temp_files)
 app.include_router(api_app.router)
 
 main_page()
-
 
 if __name__ == "__main__":
     is_frozen = getattr(sys, "frozen", False)
