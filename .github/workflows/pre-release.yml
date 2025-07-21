@@ -70,7 +70,15 @@ jobs:
 
       - name: Check artifact exists
         if: env.should_release == 'true'
-        run: test -f "dist/imx-tools-gui-${{ env.version }}-windows.zip"
+        shell: pwsh
+        env:
+          VERSION: ${{ env.version }}
+        run: |
+          $file = "dist/imx-tools-gui-$env:VERSION-windows.zip"
+          if (-Not (Test-Path $file)) {
+            Write-Error "❌ Artifact not found: $file"
+            exit 1
+          }
 
       - name: Upload release
         if: env.should_release == 'true'
