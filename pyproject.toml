@@ -14,12 +14,12 @@ authors = [
     { name = "Open-Imx", email = "open-imx@organisation.noreply.github.com" },
 ]
 dependencies = [
-    "imxInsights",
-    "openpyxl",
-    "fastapi",
-    "nicegui",
-    "sentry-sdk[fastapi,loguru]",
-    "python-dotenv",
+    "imxinsights>=0.2.1a6",
+    "openpyxl==3.1.5",
+    "fastapi==0.116.1",
+    "nicegui==2.18.0",
+    "sentry-sdk[fastapiloguru]==2.33.1",
+    "python-dotenv==1.1.1",
 ]
 
 classifiers = [
@@ -49,14 +49,14 @@ tag_sign = false
 [tool.hatch.envs.default]
 python = "3.10"
 dependencies = [
-    "mypy",
-    "ruff",
-    "pytest",
-    "pytest-cov",
-    "python-dotenv",
-    "pyinstaller",
-    "zizmor",
-    "isort",
+    "mypy==1.17.0",
+    "ruff==0.12.2",
+    "pytest==8.4.1",
+    "pytest-cov==6.2.1",
+    "python-dotenv==1.1.1",
+    "pyinstaller>=6.14.2",
+    "zizmor==1.9.0",
+    "isort=6.0.1",
 ]
 
 [tool.hatch.envs.default.scripts]
