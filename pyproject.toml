@@ -18,7 +18,7 @@ dependencies = [
     "openpyxl==3.1.5",
     "fastapi==0.116.1",
     "nicegui==2.18.0",
-    "sentry-sdk[fastapiloguru]==2.33.1",
+    "sentry-sdk[fastapiloguru]==2.35.0",
     "python-dotenv==1.1.1",
 ]
 
