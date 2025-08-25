@@ -17,7 +17,7 @@ dependencies = [
     "imxinsights>=0.2.1a6",
     "openpyxl==3.1.5",
     "fastapi==0.116.1",
-    "nicegui==2.18.0",
+    "nicegui==2.23.2",
     "sentry-sdk[fastapiloguru]==2.33.1",
     "python-dotenv==1.1.1",
 ]
